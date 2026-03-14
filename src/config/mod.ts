@@ -1,4 +1,4 @@
-import type { Config, ReasoningConfig } from '../core/types.ts';
+import type { Config, GitleaksConfig, ReasoningConfig } from '../core/types.ts';
 
 function env(key: string): string | undefined {
   return Deno.env.get(key);
@@ -59,6 +59,13 @@ function loadReasoningConfig(file: Record<string, unknown>): ReasoningConfig {
   };
 }
 
+function loadGitleaksConfig(file: Record<string, unknown>): GitleaksConfig {
+  const section = (file.gitleaks ?? {}) as Record<string, unknown>;
+  return {
+    enabled: (env('SCRUBBER_GITLEAKS_ENABLED') ?? String(section.enabled ?? 'false')) === 'true',
+  };
+}
+
 export async function load(): Promise<Config> {
   const configPath = env('SCRUBBER_CONFIG');
   const file = configPath ? await loadFile(configPath) : {};
@@ -76,5 +83,6 @@ export async function load(): Promise<Config> {
     configFile: configPath,
     adapterConfig: extractAdapterConfig(file, adapter ?? ''),
     reasoning: loadReasoningConfig(file),
+    gitleaks: loadGitleaksConfig(file),
   };
 }

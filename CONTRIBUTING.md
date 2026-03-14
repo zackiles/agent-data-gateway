@@ -8,7 +8,8 @@
 
 ## Adding an adapter
 
-Follow [docs/adapter-authoring.md](docs/adapter-authoring.md). Copy `src/adapters/_template/`, implement `extract`, register in `src/adapters/mod.ts`, add tests, and add a provider-catalog entry.
+Follow [docs/adapter-authoring.md](docs/adapter-authoring.md). Copy `src/adapters/_template/`,
+implement `extract`, register in `src/adapters/mod.ts`, add tests, and add a provider-catalog entry.
 
 ## Running tests
 
@@ -20,7 +21,8 @@ Tests use `--allow-read`, `--allow-env`, `--allow-net`, `--allow-run`, `--allow-
 
 ## Code style
 
-- No inline comments unless documenting a hidden bug, critical warning (prefix with `// DANGER:` or `// IMPORTANT:`), TODO, or complex rationale
+- No inline comments unless documenting a hidden bug, critical warning (prefix with `// DANGER:` or
+  `// IMPORTANT:`), TODO, or complex rationale
 - Simple, idiomatic names; avoid shorthand (e.g. `Messages` not `Msgs`)
 - Avoid single-caller methods: inline into the caller when logic is simple and not reused
 

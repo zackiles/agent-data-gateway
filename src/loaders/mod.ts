@@ -1,4 +1,4 @@
-import type { CompiledDetector, CompiledIndex, Index, Policy } from '../core/types.ts';
+import type { CompiledDetector, CompiledIndex, Detector, Index, Policy } from '../core/types.ts';
 
 export async function loadIndex(path: string): Promise<CompiledIndex> {
   const text = await Deno.readTextFile(path);
@@ -69,4 +69,22 @@ function compileIndex(index: Index): CompiledIndex {
 export function compileIndexFromRaw(index: Index): CompiledIndex {
   validateIndex(index);
   return compileIndex(index);
+}
+
+export function mergeDetectors(
+  index: CompiledIndex,
+  extra: Detector[],
+): CompiledIndex {
+  const existing = new Set(index.detectors.map((d) => d.id));
+  const compiled: CompiledDetector[] = extra
+    .filter((d) => !existing.has(d.id))
+    .map((d) => {
+      const flags = d.pattern.startsWith('(?i)') ? 'i' : '';
+      const pattern = d.pattern.replace(/^\(\?i\)/, '');
+      return { ...d, regex: new RegExp(pattern, flags) };
+    });
+  return {
+    ...index,
+    detectors: [...index.detectors, ...compiled],
+  };
 }

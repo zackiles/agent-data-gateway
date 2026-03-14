@@ -89,9 +89,11 @@ export function mergeFindings(findings: Finding[]): Finding[] {
     const current = sorted[i]!;
     const last = merged[merged.length - 1]!;
     if (current.start < last.end) {
-      const keepAction = RESTRICT[inlineEquivalent(
-        current.confidence >= last.confidence ? 'mask_inline' : 'allow',
-      )]! >= RESTRICT[inlineEquivalent('mask_inline')]!;
+      const keepAction = RESTRICT[
+        inlineEquivalent(
+          current.confidence >= last.confidence ? 'mask_inline' : 'allow',
+        )
+      ]! >= RESTRICT[inlineEquivalent('mask_inline')]!;
       last.end = Math.max(last.end, current.end);
       if (keepAction && current.confidence > last.confidence) {
         last.class = current.class;

@@ -6,7 +6,10 @@ interface HitRecord {
   count: number;
 }
 
-export function build(samples: Array<{ payload: unknown }>, seedDetectors: CompiledIndex['detectors']): Index {
+export function build(
+  samples: Array<{ payload: unknown }>,
+  seedDetectors: CompiledIndex['detectors'],
+): Index {
   const pathHits = new Map<string, Map<string, number>>();
   const pathCounts = new Map<string, number>();
   const keyHits = new Map<string, Map<string, number>>();
