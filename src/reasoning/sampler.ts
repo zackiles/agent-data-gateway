@@ -8,6 +8,7 @@ export interface SampleRecord {
   value_length: number;
   occurrences: number;
   all_paths: string[];
+  concrete_paths: string[];
 }
 
 export interface SampleFile {
@@ -18,23 +19,30 @@ export interface SampleFile {
 }
 
 export function sample(unknowns: LeafNode[], maxSamples: number): SampleFile {
-  const byNormalizedPath = new Map<string, LeafNode>();
+  const byNormalizedPath = new Map<string, { representative: LeafNode; concretePaths: string[] }>();
   for (const node of unknowns) {
-    if (!byNormalizedPath.has(node.normalizedPath)) {
-      byNormalizedPath.set(node.normalizedPath, node);
+    const existing = byNormalizedPath.get(node.normalizedPath);
+    if (existing) {
+      existing.concretePaths.push(node.path);
+    } else {
+      byNormalizedPath.set(node.normalizedPath, {
+        representative: node,
+        concretePaths: [node.path],
+      });
     }
   }
 
   const dedupKey = (key: string, valueType: string) => `${key}::${valueType}`;
   const deduped = new Map<string, SampleRecord>();
 
-  for (const node of byNormalizedPath.values()) {
+  for (const { representative: node, concretePaths } of byNormalizedPath.values()) {
     const valueType = node.value === null ? 'null' : typeof node.value;
     const dk = dedupKey(node.key, valueType);
     const existing = deduped.get(dk);
     if (existing) {
       existing.occurrences++;
       existing.all_paths.push(node.normalizedPath);
+      existing.concrete_paths.push(...concretePaths);
     } else {
       let valueSample: string | number | boolean | null;
       let valueLength = 0;
@@ -55,6 +63,7 @@ export function sample(unknowns: LeafNode[], maxSamples: number): SampleFile {
         value_length: valueLength,
         occurrences: 1,
         all_paths: [node.normalizedPath],
+        concrete_paths: [...concretePaths],
       });
     }
   }

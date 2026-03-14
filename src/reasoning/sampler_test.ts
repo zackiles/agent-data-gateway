@@ -14,7 +14,7 @@ function makeNode(overrides: Partial<LeafNode> = {}): LeafNode {
   };
 }
 
-Deno.test('sample - groups by normalized path', () => {
+Deno.test('sample - groups by normalized path and tracks concrete paths', () => {
   const unknowns: LeafNode[] = [
     makeNode({ path: '/items/0/code', normalizedPath: '/items/*/code', key: 'code', value: 'A1' }),
     makeNode({ path: '/items/1/code', normalizedPath: '/items/*/code', key: 'code', value: 'B2' }),
@@ -23,9 +23,12 @@ Deno.test('sample - groups by normalized path', () => {
   assertEquals(result.sample_count, 1);
   assertEquals(result.total_unknown_nodes, 2);
   assertEquals(result.samples[0]!.key, 'code');
+  assertEquals(result.samples[0]!.concrete_paths.length, 2);
+  assertEquals(result.samples[0]!.concrete_paths.includes('/items/0/code'), true);
+  assertEquals(result.samples[0]!.concrete_paths.includes('/items/1/code'), true);
 });
 
-Deno.test('sample - deduplicates by key+type', () => {
+Deno.test('sample - deduplicates by key+type and merges concrete paths', () => {
   const unknowns: LeafNode[] = [
     makeNode({ path: '/a/name', normalizedPath: '/a/name', key: 'name', value: 'Alice' }),
     makeNode({ path: '/b/name', normalizedPath: '/b/name', key: 'name', value: 'Bob' }),
@@ -33,6 +36,9 @@ Deno.test('sample - deduplicates by key+type', () => {
   const result = sample(unknowns, 50);
   assertEquals(result.sample_count, 1);
   assertEquals(result.samples[0]!.all_paths.length, 2);
+  assertEquals(result.samples[0]!.concrete_paths.length, 2);
+  assertEquals(result.samples[0]!.concrete_paths.includes('/a/name'), true);
+  assertEquals(result.samples[0]!.concrete_paths.includes('/b/name'), true);
 });
 
 Deno.test('sample - caps at maxSamples', () => {

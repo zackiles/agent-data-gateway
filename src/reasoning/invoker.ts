@@ -35,22 +35,23 @@ export async function invoke(
       env: {},
     });
 
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), config.timeout);
+    const child = cmd.spawn();
+    const result = await Promise.race([
+      child.output(),
+      new Promise<never>((_, reject) => {
+        setTimeout(() => {
+          try { child.kill('SIGTERM'); } catch { /* already exited */ }
+          reject(new Error(`CLI timed out after ${config.timeout}ms`));
+        }, config.timeout);
+      }),
+    ]);
 
-    let output: Deno.CommandOutput;
-    try {
-      output = await cmd.output();
-    } finally {
-      clearTimeout(timeout);
+    if (result.code !== 0) {
+      const stderr = new TextDecoder().decode(result.stderr);
+      throw new Error(`CLI exited with code ${result.code}: ${stderr.slice(0, 500)}`);
     }
 
-    if (output.code !== 0) {
-      const stderr = new TextDecoder().decode(output.stderr);
-      throw new Error(`CLI exited with code ${output.code}: ${stderr.slice(0, 500)}`);
-    }
-
-    const stdout = new TextDecoder().decode(output.stdout);
+    const stdout = new TextDecoder().decode(result.stdout);
     return parseOutput(stdout, sampleFile, config);
   } finally {
     try {
@@ -106,16 +107,16 @@ function parseOutput(
     throw new Error('CLI output missing "result" or "classifications"');
   }
 
-  const pathMap = new Map<string, string[]>();
+  const concretePathMap = new Map<string, string[]>();
   for (const s of sampleFile.samples) {
-    pathMap.set(s.path, s.all_paths);
+    concretePathMap.set(s.path, s.concrete_paths);
   }
 
   const results: Classification[] = [];
   for (const c of classifications) {
     if (c.class === 'unknown' || c.confidence < config.minConfidence) continue;
-    const allPaths = pathMap.get(c.path) ?? [c.path];
-    for (const path of allPaths) {
+    const concretePaths = concretePathMap.get(c.path) ?? [c.path];
+    for (const path of concretePaths) {
       results.push({
         path,
         class: c.class,

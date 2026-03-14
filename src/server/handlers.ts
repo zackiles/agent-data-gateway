@@ -108,6 +108,7 @@ export async function handleClassify(
 
   const nodes = [...traverse(body.payload)];
   const results: ClassifyResult[] = [];
+  const unknowns: typeof nodes = [];
 
   for (const node of nodes) {
     const c = classify(node, ctx.index);
@@ -118,6 +119,15 @@ export async function handleClassify(
     const findings = findInline(node, ctx.index);
     if (findings.length > 0) {
       results.push({ path: node.path, findings });
+    } else {
+      unknowns.push(node);
+    }
+  }
+
+  if (ctx.reasoning && unknowns.length > 0) {
+    const reasoningResults = await ctx.reasoning.classify(unknowns, ctx.index);
+    for (const r of reasoningResults) {
+      results.push({ path: r.path, class: r.class, source: r.source, confidence: r.confidence });
     }
   }
 
