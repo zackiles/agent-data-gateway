@@ -7,13 +7,13 @@ export interface SSEEvent {
 
 export function detect(request: Request): boolean {
   const contentType = request.headers.get('content-type') ?? '';
-  const accept = request.headers.get('accept') ?? '';
-  return contentType.includes('text/event-stream') || accept.includes('text/event-stream');
+  return contentType.includes('text/event-stream');
 }
 
 export function parse(body: string): SSEEvent[] {
+  const normalized = body.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
   const events: SSEEvent[] = [];
-  const blocks = body.split(/\n\n+/);
+  const blocks = normalized.split(/\n\n+/);
 
   for (const block of blocks) {
     if (!block.trim()) continue;
