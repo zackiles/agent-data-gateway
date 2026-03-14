@@ -1,0 +1,33 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: agent-data-gateway
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/maxScale: "10"
+    spec:
+      containers:
+        - image: IMAGE_PLACEHOLDER
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SCRUBBER_ADAPTER
+              value: "oidc-jwt"
+            - name: SCRUBBER_INDEX
+              value: "/data/example-index.json"
+            - name: SCRUBBER_POLICY
+              value: "/data/example-policy.json"
+            - name: SCRUBBER_PORT
+              value: "8080"
+            - name: SCRUBBER_JWT_ISSUER
+              value: "ISSUER_PLACEHOLDER"
+            - name: SCRUBBER_JWT_AUDIENCE
+              value: "AUDIENCE_PLACEHOLDER"
+            - name: SCRUBBER_JWT_JWKS_URL
+              value: "JWKS_URL_PLACEHOLDER"
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "1"

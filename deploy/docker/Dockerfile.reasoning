@@ -1,0 +1,27 @@
+FROM denoland/deno:2.1.4 AS builder
+WORKDIR /app
+COPY deno.json .
+COPY src/ src/
+RUN deno compile --allow-net --allow-read --allow-env --allow-run --allow-write --output agent-data-gateway src/server/mod.ts
+
+FROM debian:bookworm-slim
+
+ARG BUILD_REASONING_CLI=both
+ARG BUILD_REASONING_CLI_VERSION=latest
+
+RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates && rm -rf /var/lib/apt/lists/*
+
+RUN if [ "$BUILD_REASONING_CLI" = "claude" ] || [ "$BUILD_REASONING_CLI" = "both" ]; then \
+      curl -fsSL https://claude.ai/install.sh | bash; \
+    fi
+
+RUN if [ "$BUILD_REASONING_CLI" = "cursor" ] || [ "$BUILD_REASONING_CLI" = "both" ]; then \
+      curl -fsSL https://cursor.com/install | bash; \
+    fi
+
+COPY --from=builder /app/agent-data-gateway /agent-data-gateway
+COPY data/ /data/
+COPY src/core/system-prompt-agent-classifier.md /src/core/system-prompt-agent-classifier.md
+
+EXPOSE 8080
+ENTRYPOINT ["/agent-data-gateway"]

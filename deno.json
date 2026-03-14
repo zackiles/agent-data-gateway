@@ -1,0 +1,31 @@
+{
+  "tasks": {
+    "dev": "deno run --allow-net --allow-read --allow-env --allow-run --watch src/server/mod.ts",
+    "start": "deno run --allow-net --allow-read --allow-env --allow-run src/server/mod.ts",
+    "test": "deno test --allow-read --allow-env --allow-net --allow-run --allow-write",
+    "lint": "deno lint",
+    "fmt": "deno fmt",
+    "check": "deno check src/server/mod.ts",
+    "build": "deno compile --allow-net --allow-read --allow-env --allow-run --allow-write --output agent-data-gateway src/server/mod.ts"
+  },
+  "imports": {
+    "@std/assert": "jsr:@std/assert@^1",
+    "@std/path": "jsr:@std/path@^1",
+    "@std/encoding": "jsr:@std/encoding@^1",
+    "jose": "https://deno.land/x/jose@v5.9.6/index.ts"
+  },
+  "compilerOptions": {
+    "strict": true,
+    "noUncheckedIndexedAccess": true
+  },
+  "fmt": {
+    "lineWidth": 100,
+    "singleQuote": true
+  },
+  "lint": {
+    "rules": {
+      "exclude": ["no-explicit-any"]
+    }
+  },
+  "exclude": ["deploy/", "scripts/", "docs/"]
+}

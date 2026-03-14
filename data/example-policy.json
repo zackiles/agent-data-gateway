@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "default_rule": {
+    "default_action": "allow",
+    "unknown_action": "allow",
+    "class_actions": {
+      "government.id": "drop",
+      "payment.card.pan": "drop",
+      "credentials.secret": "drop"
+    },
+    "path_actions": {}
+  },
+  "rules": [
+    {
+      "match": {
+        "groups_any": ["support"],
+        "purposes_any": ["ticket"]
+      },
+      "default_action": "allow",
+      "unknown_action": "allow",
+      "class_actions": {
+        "pii.email": "mask",
+        "pii.phone": "mask",
+        "government.id": "drop",
+        "payment.card.pan": "drop",
+        "credentials.secret": "drop"
+      },
+      "path_actions": {
+        "/customer/notes": "mask_inline"
+      }
+    },
+    {
+      "match": {
+        "groups_any": ["risk", "fraud"],
+        "purposes_any": ["investigation"]
+      },
+      "default_action": "allow",
+      "unknown_action": "allow",
+      "class_actions": {
+        "pii.email": "allow",
+        "pii.phone": "allow",
+        "government.id": "last4",
+        "payment.card.pan": "drop",
+        "credentials.secret": "drop"
+      },
+      "path_actions": {}
+    }
+  ]
+}

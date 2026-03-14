@@ -1,0 +1,21 @@
+name: Test
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - run: deno task test
+      - name: Validate example data files
+        run: |
+          deno eval "const i = JSON.parse(await Deno.readTextFile('data/example-index.json')); if(!i.version) throw new Error('invalid index')"
+          deno eval "const p = JSON.parse(await Deno.readTextFile('data/example-policy.json')); if(!p.version) throw new Error('invalid policy')"
+          deno eval "const c = JSON.parse(await Deno.readTextFile('configs/example-config.json')); if(!c.adapter) throw new Error('invalid config')"

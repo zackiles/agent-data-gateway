@@ -1,0 +1,5 @@
+.env
+*.env.local
+agent-data-gateway
+/tmp/
+.DS_Store

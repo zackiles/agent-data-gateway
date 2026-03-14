@@ -1,0 +1,13 @@
+{
+  "adapter": "oidc-jwt",
+  "index": "./data/example-index.json",
+  "policy": "./data/example-policy.json",
+  "port": 8080,
+  "oidc-jwt": {
+    "issuer": "https://accounts.google.com",
+    "audience": "my-service",
+    "jwks_url": "https://www.googleapis.com/oauth2/v3/certs",
+    "user_claim": "email",
+    "groups_claim": "groups"
+  }
+}

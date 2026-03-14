@@ -1,0 +1,58 @@
+{
+  "version": 1,
+  "path_classes": {
+    "/customer/email": { "class": "pii.email", "confidence": 1, "count": 1 },
+    "/customer/phone": { "class": "pii.phone", "confidence": 1, "count": 1 }
+  },
+  "key_classes": {
+    "emailAddress": { "class": "pii.email", "confidence": 0.97, "count": 1 },
+    "sin": { "class": "government.id", "confidence": 0.96, "count": 1 },
+    "ssn": { "class": "government.id", "confidence": 0.96, "count": 1 },
+    "phone": { "class": "pii.phone", "confidence": 0.95, "count": 1 },
+    "birthdate": { "class": "pii.birthdate", "confidence": 0.94, "count": 1 }
+  },
+  "detectors": [
+    {
+      "id": "email.full",
+      "mode": "fullmatch",
+      "class": "pii.email",
+      "pattern": "(?i)^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}$",
+      "confidence": 0.98
+    },
+    {
+      "id": "email.contains",
+      "mode": "contains",
+      "class": "pii.email",
+      "pattern": "(?i)\\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}\\b",
+      "confidence": 0.95
+    },
+    {
+      "id": "phone.full",
+      "mode": "fullmatch",
+      "class": "pii.phone",
+      "pattern": "(?i)^(?:\\+?1[-. ]?)?\\(?\\d{3}\\)?[-. ]?\\d{3}[-. ]?\\d{4}$",
+      "confidence": 0.96
+    },
+    {
+      "id": "phone.contains",
+      "mode": "contains",
+      "class": "pii.phone",
+      "pattern": "(?i)\\b(?:\\+?1[-. ]?)?\\(?\\d{3}\\)?[-. ]?\\d{3}[-. ]?\\d{4}\\b",
+      "confidence": 0.92
+    },
+    {
+      "id": "govid.full",
+      "mode": "fullmatch",
+      "class": "government.id",
+      "pattern": "^\\d{3}[- ]?\\d{2}[- ]?\\d{4}$|^\\d{3}[- ]?\\d{3}[- ]?\\d{3}$",
+      "confidence": 0.95
+    },
+    {
+      "id": "pan.full",
+      "mode": "fullmatch",
+      "class": "payment.card.pan",
+      "pattern": "^\\d{13,19}$",
+      "confidence": 0.90
+    }
+  ]
+}
