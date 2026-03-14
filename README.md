@@ -1,11 +1,13 @@
 # Agent Data Gateway
 
-A service that automatically finds and removes sensitive data from JSON responses before they reach your users.
+A service that automatically finds and removes sensitive data from JSON responses before they reach
+your users.
 
 ## Why use it?
 
 - Catches PII and secrets automatically via path, key, and pattern-based classification
-- Works with any auth provider through pluggable adapters (no-auth, trusted-header, OIDC/JWT, API key)
+- Works with any auth provider through pluggable adapters (no-auth, trusted-header, OIDC/JWT, API
+  key)
 - Deploys as a single container with no external runtime dependencies
 
 ## Quickstart
@@ -27,16 +29,17 @@ curl -X POST http://localhost:8080/sanitize \
   }'
 ```
 
-The response shows `email` masked (e.g. `j***@example.com`) and `sin` dropped entirely, per the example policy.
+The response shows `email` masked (e.g. `j***@example.com`) and `sin` dropped entirely, per the
+example policy.
 
 ## Choose your auth
 
-| Mode | Use case |
-|------|----------|
-| **no-auth** | Local development; static user and groups |
+| Mode               | Use case                                                       |
+| ------------------ | -------------------------------------------------------------- |
+| **no-auth**        | Local development; static user and groups                      |
 | **trusted-header** | Reverse proxy (Nginx, Envoy, ALB, IAP) sets user/group headers |
-| **oidc-jwt** | Bearer JWT validation with JWKS; Okta, Auth0, Azure AD, etc. |
-| **api-key** | Service-to-service; static key-to-identity mapping |
+| **oidc-jwt**       | Bearer JWT validation with JWKS; Okta, Auth0, Azure AD, etc.   |
+| **api-key**        | Service-to-service; static key-to-identity mapping             |
 
 See [docs/auth-modes.md](docs/auth-modes.md) for config keys and when to use each.
 
@@ -51,14 +54,19 @@ See [docs/deployment.md](docs/deployment.md) for copy-paste commands per platfor
 
 ## Advanced: LLM-assisted classification
 
-The deterministic classifier handles most cases. For edge cases (unusual field names, ambiguous values), enable the optional reasoning middleware. It shells out to Claude Code CLI or Cursor CLI to classify unknowns, then merges results into the policy engine.
+The deterministic classifier handles most cases. For edge cases (unusual field names, ambiguous
+values), enable the optional reasoning middleware. It shells out to Claude Code CLI or Cursor CLI to
+classify unknowns, then merges results into the policy engine.
 
-See [docs/reasoning-middleware.md](docs/reasoning-middleware.md) for setup, config, and troubleshooting.
+See [docs/reasoning-middleware.md](docs/reasoning-middleware.md) for setup, config, and
+troubleshooting.
 
 ## Configuration reference
 
-All `SCRUBBER_*` environment variables are documented in [docs/config-reference.md](docs/config-reference.md).
+All `SCRUBBER_*` environment variables are documented in
+[docs/config-reference.md](docs/config-reference.md).
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, code style, and PR process. To add a new identity adapter, follow [docs/adapter-authoring.md](docs/adapter-authoring.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, code style, and PR process. To add a
+new identity adapter, follow [docs/adapter-authoring.md](docs/adapter-authoring.md).

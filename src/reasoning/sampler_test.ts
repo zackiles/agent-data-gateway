@@ -48,8 +48,7 @@ Deno.test('sample - caps at maxSamples', () => {
       normalizedPath: `/field${i}`,
       key: `field${i}`,
       value: `val${i}`,
-    })
-  );
+    }));
   const result = sample(unknowns, 10);
   assertEquals(result.sample_count, 10);
 });

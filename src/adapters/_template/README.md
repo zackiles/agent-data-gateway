@@ -14,6 +14,7 @@ Copy this directory to create a new identity adapter.
 ## Contract
 
 Your adapter MUST:
+
 - Return an `Identity` with at least `user` populated
 - Throw a clear `Error` when auth material is missing or invalid
 - Not import anything from `src/core/` except types

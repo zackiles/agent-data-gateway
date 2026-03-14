@@ -152,6 +152,10 @@ export interface ReasoningConfig {
   promptFile: string;
 }
 
+export interface GitleaksConfig {
+  enabled: boolean;
+}
+
 export interface Config {
   adapter: string;
   index: string;
@@ -160,4 +164,5 @@ export interface Config {
   configFile?: string;
   adapterConfig: Record<string, string>;
   reasoning: ReasoningConfig;
+  gitleaks: GitleaksConfig;
 }

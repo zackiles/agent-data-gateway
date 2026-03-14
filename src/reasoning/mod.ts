@@ -17,7 +17,11 @@ export async function create(config: ReasoningConfig): Promise<ReasoningMiddlewa
 
   let cliAvailable = true;
   try {
-    const cmd = new Deno.Command(config.cli, { args: ['--version'], stdout: 'piped', stderr: 'piped' });
+    const cmd = new Deno.Command(config.cli, {
+      args: ['--version'],
+      stdout: 'piped',
+      stderr: 'piped',
+    });
     const { code } = await cmd.output();
     if (code !== 0) cliAvailable = false;
   } catch {
@@ -41,7 +45,9 @@ export async function create(config: ReasoningConfig): Promise<ReasoningMiddlewa
         console.error(`Reasoning: invocation failed: ${msg}`);
         if (msg.includes('rate') || msg.includes('quota')) {
           coolingDown = true;
-          setTimeout(() => { coolingDown = false; }, config.cooldown);
+          setTimeout(() => {
+            coolingDown = false;
+          }, config.cooldown);
         }
         return [];
       }

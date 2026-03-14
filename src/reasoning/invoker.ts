@@ -40,7 +40,9 @@ export async function invoke(
       child.output(),
       new Promise<never>((_, reject) => {
         setTimeout(() => {
-          try { child.kill('SIGTERM'); } catch { /* already exited */ }
+          try {
+            child.kill('SIGTERM');
+          } catch { /* already exited */ }
           reject(new Error(`CLI timed out after ${config.timeout}ms`));
         }, config.timeout);
       }),
@@ -64,10 +66,14 @@ function buildArgs(config: ReasoningConfig, prompt: string, _tmpDir: string): st
   if (config.cli === 'claude') {
     const args = [
       '-p',
-      '--system-prompt-file', `${_tmpDir}/system-prompt.md`,
-      '--output-format', 'json',
-      '--max-turns', '1',
-      '--allowedTools', 'Read',
+      '--system-prompt-file',
+      `${_tmpDir}/system-prompt.md`,
+      '--output-format',
+      'json',
+      '--max-turns',
+      '1',
+      '--allowedTools',
+      'Read',
     ];
     if (config.model) args.push('--model', config.model);
     Deno.writeTextFileSync(`${_tmpDir}/system-prompt.md`, prompt);

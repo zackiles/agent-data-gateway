@@ -1,15 +1,21 @@
 import { load as loadConfig } from '../config/mod.ts';
-import { loadIndex, loadPolicy } from '../loaders/mod.ts';
+import { loadIndex, loadPolicy, mergeDetectors } from '../loaders/mod.ts';
 import { load as loadAdapter } from '../adapters/mod.ts';
 import { handleBuild, handleClassify, handleSanitize } from './handlers.ts';
 import type { HandlerContext } from './handlers.ts';
 import { create as createReasoning } from '../reasoning/mod.ts';
+import { detectors as gitleaksDetectors } from '../core/gitleaks.ts';
 
 async function main() {
   const config = await loadConfig();
-  const index = await loadIndex(config.index);
+  let index = await loadIndex(config.index);
   const policy = await loadPolicy(config.policy);
   const adapter = await loadAdapter(config);
+
+  if (config.gitleaks.enabled) {
+    index = mergeDetectors(index, gitleaksDetectors());
+    console.log(`Gitleaks protection enabled (${gitleaksDetectors().length} detectors loaded)`);
+  }
 
   let reasoning;
   if (config.reasoning.enabled) {
