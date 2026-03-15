@@ -6,7 +6,8 @@
     "./hono": "./src/pkg/hono.ts",
     "./oak": "./src/pkg/oak.ts",
     "./express": "./src/pkg/express.ts",
-    "./fastify": "./src/pkg/fastify.ts"
+    "./fastify": "./src/pkg/fastify.ts",
+    "./nextjs": "./src/pkg/nextjs.ts"
   },
   "publish": {
     "exclude": [
