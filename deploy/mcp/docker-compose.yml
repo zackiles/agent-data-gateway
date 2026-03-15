@@ -1,0 +1,17 @@
+services:
+  agent-data-gateway-mcp:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile.mcp
+    ports:
+      - "8080:8080"
+    environment:
+      SCRUBBER_ADAPTER: no-auth
+      SCRUBBER_INDEX: /data/example-index.json
+      SCRUBBER_POLICY: /data/example-policy.json
+      SCRUBBER_NOAUTH_USER: local-dev
+      SCRUBBER_NOAUTH_GROUPS: support,admin
+      MCP_TRANSPORT: http
+      MCP_PORT: "8080"
+    volumes:
+      - ../../data:/data:ro

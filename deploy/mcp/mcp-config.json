@@ -1,0 +1,22 @@
+{
+  "mcpServers": {
+    "agent-data-gateway": {
+      "command": "deno",
+      "args": [
+        "run",
+        "--allow-net",
+        "--allow-read",
+        "--allow-env",
+        "--allow-run",
+        "src/mcp/mod.ts"
+      ],
+      "env": {
+        "SCRUBBER_ADAPTER": "no-auth",
+        "SCRUBBER_INDEX": "./data/example-index.json",
+        "SCRUBBER_POLICY": "./data/example-policy.json",
+        "SCRUBBER_NOAUTH_USER": "local-dev",
+        "SCRUBBER_NOAUTH_GROUPS": "support,admin"
+      }
+    }
+  }
+}
