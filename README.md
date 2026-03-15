@@ -4,7 +4,7 @@ Automatic PII and secret detection for JSON payloads. Classifies fields by path,
 pattern, then applies policy-driven transforms (mask, drop, hash, last4, etc.) before data leaves
 your backend.
 
-## Two ways to use it
+## Three ways to use it
 
 ### 1. Standalone service
 
@@ -55,6 +55,36 @@ export default app;
 ```
 
 See [docs/jsr-package.md](docs/jsr-package.md) for all supported frameworks and full API reference.
+
+### 3. MCP server (AI tool integration)
+
+Run the gateway as an MCP server so AI assistants (Claude Desktop, Cursor, Windsurf) can sanitize
+and classify data through standard tool calls.
+
+Add to your MCP client config:
+
+```json
+{
+  "mcpServers": {
+    "agent-data-gateway": {
+      "command": "deno",
+      "args": ["run", "--allow-net", "--allow-read", "--allow-env", "--allow-run", "src/mcp/mod.ts"],
+      "cwd": "/path/to/agent-data-gateway",
+      "env": {
+        "SCRUBBER_ADAPTER": "no-auth",
+        "SCRUBBER_INDEX": "./data/example-index.json",
+        "SCRUBBER_POLICY": "./data/example-policy.json",
+        "SCRUBBER_NOAUTH_USER": "local-dev",
+        "SCRUBBER_NOAUTH_GROUPS": "support,admin"
+      }
+    }
+  }
+}
+```
+
+Or run locally: `./scripts/run-mcp.sh`
+
+See [docs/mcp.md](docs/mcp.md) for all transport options, Docker deployment, and tool reference.
 
 ## API endpoints
 
@@ -108,6 +138,8 @@ are included, or implement the `Adapter` interface for custom auth. See
 | Docker Compose | `docker compose -f deploy/generic/docker-compose.yml up` |
 | Cloud Run      | `deploy/cloud-run/service.yaml`                          |
 | ECS            | `deploy/ecs/task-definition.json`                        |
+| MCP (local)    | `./scripts/run-mcp.sh`                                   |
+| MCP (Docker)   | `docker build -f deploy/docker/Dockerfile.mcp .`         |
 
 See [docs/deployment.md](docs/deployment.md) for per-platform copy-paste commands.
 
