@@ -131,6 +131,37 @@ classify unknowns, then merges results into the policy engine.
 
 See [docs/reasoning-middleware.md](docs/reasoning-middleware.md) for setup and configuration.
 
+## Agent skill (Claude Code / Cursor)
+
+Install the Agent Data Gateway skill to let an AI agent handle setup, configuration, and deployment
+for you. Works with Claude Code, Cursor, and any agent supporting the
+[Agent Skills](https://agentskills.io/) standard.
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/zackiles/agent-data-gateway/main/skill/scripts/install.sh | bash
+```
+
+Then ask your agent:
+
+```
+Use the agent-data-gateway skill to add PII sanitization to this project
+```
+
+Or do both in a single command:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/zackiles/agent-data-gateway/main/skill/scripts/install.sh | bash && claude "Use the agent-data-gateway skill to add PII sanitization to this project using the best framework adapter for my stack, then verify it works"
+```
+
+Remove the skill:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/zackiles/agent-data-gateway/main/skill/scripts/uninstall.sh | bash
+```
+
+See [docs/skill.md](docs/skill.md) for all options, environment-aware prompts, and registry install
+via `npx add-skill`.
+
 ## Configuration reference
 
 All `SCRUBBER_*` environment variables are documented in
