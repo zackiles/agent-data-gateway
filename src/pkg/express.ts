@@ -64,6 +64,8 @@ function route(handler: (request: Request) => Promise<Response>): Handler {
 
 export function adapter(gateway: Gateway): ExpressRouter {
   const router = express.Router();
+  router.use(express.json());
+  router.use(express.text({ type: 'text/event-stream' }));
 
   router.post('/sanitize', route(gateway.sanitize));
   router.post('/classify', route(gateway.classify));

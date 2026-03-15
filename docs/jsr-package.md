@@ -90,14 +90,13 @@ app.listen({ port: 8000 });
 
 ### Express
 
-Requires body-parsing middleware (`express.json()`) before the adapter routes.
+Body parsing for JSON and SSE is handled internally by the adapter.
 
 ```typescript
 import express from "express";
 import { adapter } from "@agent-data-gateway/gateway/express";
 
 const app = express();
-app.use(express.json());
 app.use("/gateway", adapter(gateway));
 app.listen(8000);
 ```

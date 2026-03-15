@@ -38,7 +38,6 @@ async function withExpressServer(
 ) {
   const gw = createGateway();
   const app = express();
-  app.use(express.json());
 
   if (prefix) {
     app.use(prefix, adapter(gw));
@@ -118,4 +117,23 @@ Deno.test('Express adapter - prefix mounting', async () => {
     const body = await res.json();
     assertEquals(body.payload.name, 'Alice');
   }, '/api/gateway');
+});
+
+Deno.test('Express adapter - SSE support', async () => {
+  await withExpressServer(async (port) => {
+    const sseBody = 'event: msg\ndata: ' +
+      JSON.stringify({
+        payload: { customer: { email: 'a@b.com' } },
+        context: { purpose: 'test' },
+      }) +
+      '\n\n';
+    const res = await fetch(`http://localhost:${port}/sanitize`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/event-stream' },
+      body: sseBody,
+    });
+    assertEquals(res.status, 200);
+    const text = await res.text();
+    assertEquals(text.includes('a***@b.com'), true);
+  });
 });
