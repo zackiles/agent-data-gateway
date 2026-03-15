@@ -21,8 +21,8 @@ import type { ReasoningMiddleware } from '../reasoning/mod.ts';
 import {
   handleBuild,
   handleClassify,
-  handleSanitize,
   type HandlerContext,
+  handleSanitize,
 } from '../server/handlers.ts';
 import { compileIndexFromRaw, mergeDetectors } from '../loaders/mod.ts';
 import { detectors as gitleaksDetectors } from '../core/gitleaks.ts';
@@ -131,11 +131,11 @@ export class Gateway {
     const url = new URL(request.url);
     switch (url.pathname) {
       case '/sanitize':
-        return this.sanitize(request);
+        return await this.sanitize(request);
       case '/classify':
-        return this.classify(request);
+        return await this.classify(request);
       case '/index/build':
-        return this.build(request);
+        return await this.build(request);
       default:
         return new Response(JSON.stringify({ error: 'Not found' }), {
           status: 404,

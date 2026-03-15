@@ -7,7 +7,9 @@ interface OakContext {
     method: string;
     headers: Headers;
     hasBody: boolean;
-    body: { stream(): ReadableStream<Uint8Array> };
+    body: {
+      text(): Promise<string>;
+    };
   };
   response: {
     status: number;
@@ -16,14 +18,15 @@ interface OakContext {
   };
 }
 
-function toRequest(ctx: OakContext): Request {
-  const body = ctx.request.hasBody ? ctx.request.body.stream() : undefined;
+async function toRequest(ctx: OakContext): Promise<Request> {
+  let body: string | undefined;
+  if (ctx.request.hasBody) {
+    body = await ctx.request.body.text();
+  }
   return new Request(ctx.request.url, {
     method: ctx.request.method,
     headers: ctx.request.headers,
-    // deno-lint-ignore no-explicit-any
-    body: body as any,
-    ...(body ? { duplex: 'half' } : {}),
+    ...(body ? { body } : {}),
   });
 }
 
@@ -39,19 +42,19 @@ export function adapter(gateway: Gateway): Router {
   const router = new Router();
 
   router.post('/sanitize', async (ctx) => {
-    const request = toRequest(ctx as unknown as OakContext);
+    const request = await toRequest(ctx as unknown as OakContext);
     const response = await gateway.sanitize(request);
     applyResponse(ctx as unknown as OakContext, response);
   });
 
   router.post('/classify', async (ctx) => {
-    const request = toRequest(ctx as unknown as OakContext);
+    const request = await toRequest(ctx as unknown as OakContext);
     const response = await gateway.classify(request);
     applyResponse(ctx as unknown as OakContext, response);
   });
 
   router.post('/index/build', async (ctx) => {
-    const request = toRequest(ctx as unknown as OakContext);
+    const request = await toRequest(ctx as unknown as OakContext);
     const response = await gateway.build(request);
     applyResponse(ctx as unknown as OakContext, response);
   });

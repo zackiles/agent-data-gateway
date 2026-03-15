@@ -1,9 +1,4 @@
-import type {
-  FastifyInstance,
-  FastifyPluginAsync,
-  FastifyReply,
-  FastifyRequest,
-} from 'fastify';
+import type { FastifyInstance, FastifyPluginAsync, FastifyReply, FastifyRequest } from 'fastify';
 import type { Gateway } from './mod.ts';
 
 function toWebRequest(request: FastifyRequest): Request {
@@ -35,6 +30,7 @@ async function sendResponse(reply: FastifyReply, response: Response) {
 }
 
 export function adapter(gateway: Gateway): FastifyPluginAsync {
+  // deno-lint-ignore require-await
   return async (fastify: FastifyInstance) => {
     fastify.addContentTypeParser(
       'text/event-stream',

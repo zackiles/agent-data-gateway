@@ -55,10 +55,7 @@ async function sendResponse(res: ExpressResponse, response: Response) {
 
 type Handler = (req: ExpressRequest, res: ExpressResponse, next: NextFunction) => void;
 
-function route(
-  gateway: Gateway,
-  handler: (request: Request) => Promise<Response>,
-): Handler {
+function route(handler: (request: Request) => Promise<Response>): Handler {
   return (req: ExpressRequest, res: ExpressResponse, next: NextFunction) => {
     const request = toWebRequest(req);
     handler(request).then((response) => sendResponse(res, response)).catch(next);
@@ -68,9 +65,9 @@ function route(
 export function adapter(gateway: Gateway): ExpressRouter {
   const router = express.Router();
 
-  router.post('/sanitize', route(gateway, gateway.sanitize));
-  router.post('/classify', route(gateway, gateway.classify));
-  router.post('/index/build', route(gateway, gateway.build));
+  router.post('/sanitize', route(gateway.sanitize));
+  router.post('/classify', route(gateway.classify));
+  router.post('/index/build', route(gateway.build));
 
   return router;
 }
