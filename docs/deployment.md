@@ -1,6 +1,10 @@
 # Deployment
 
-Per-platform deployment with copy-paste commands.
+This page covers deploying the gateway as a **standalone service**. If you want to embed the gateway
+directly into your own application as middleware, see
+[jsr-package.md](jsr-package.md) instead.
+
+## Standalone service deployment
 
 ## Docker
 
@@ -69,3 +73,13 @@ aws ecs create-service --cluster CLUSTER --service-name agent-data-gateway \
 ```
 
 Ensure the task has access to index and policy files (baked into image or mounted from EFS/Secrets Manager).
+
+## Library deployment (alternative)
+
+Instead of running a separate container, you can embed the gateway into your existing application.
+Install the JSR package and mount it on your framework of choice (Hono, Oak, Express, Fastify,
+Next.js). The API endpoints, index format, and policy format are identical — the only difference is
+how the gateway starts (as a `Gateway` constructor call instead of a container entrypoint) and where
+auth is configured (constructor options instead of environment variables).
+
+See [jsr-package.md](jsr-package.md) for setup instructions.
