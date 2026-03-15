@@ -24,7 +24,7 @@ export interface HandlerContext {
   index: CompiledIndex;
   policy: Policy;
   adapter: Adapter;
-  reasoning?: ReasoningMiddleware;
+  reasoning?: ReasoningMiddleware | undefined;
 }
 
 interface SanitizeResult {

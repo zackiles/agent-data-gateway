@@ -1,8 +1,8 @@
 export interface SSEEvent {
-  event?: string;
+  event?: string | undefined;
   data: string;
-  id?: string;
-  retry?: number;
+  id?: string | undefined;
+  retry?: number | undefined;
 }
 
 export function detect(request: Request): boolean {
