@@ -12,6 +12,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - name: Generate changelog
         id: changelog
         run: |
@@ -24,6 +25,15 @@ jobs:
           echo "changes<<EOF" >> $GITHUB_OUTPUT
           echo "$CHANGES" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Bundle skill
+        run: |
+          mkdir -p dist
+          tar -czf dist/agent-data-gateway-skill.tar.gz -C skill .
+          cp skill/scripts/install.sh dist/install-skill.sh
+          cp skill/scripts/uninstall.sh dist/uninstall-skill.sh
+          chmod +x dist/install-skill.sh dist/uninstall-skill.sh
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -35,9 +45,38 @@ jobs:
             - Base: `ghcr.io/${{ github.repository }}:${{ github.ref_name }}`
             - Reasoning: `ghcr.io/${{ github.repository }}-reasoning:${{ github.ref_name }}`
 
+            ## Agent Skill
+
+            Install the Agent Data Gateway skill for Claude Code or Cursor with a single command:
+
+            ```bash
+            curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}/skill/scripts/install.sh | bash
+            ```
+
+            Or install a specific version:
+
+            ```bash
+            curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/main/skill/scripts/install.sh | bash -s -- --version ${{ github.ref_name }}
+            ```
+
+            Or use `npx add-skill`:
+
+            ```bash
+            npx add-skill ${{ github.repository }}
+            ```
+
+            Remove the skill:
+
+            ```bash
+            curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/main/skill/scripts/uninstall.sh | bash
+            ```
+
             ## Quickstart
-            See [README.md](README.md) for getting started.
+            See [README.md](README.md) for getting started, or see the [Skill documentation](docs/skill.md) for agent-assisted setup.
           files: |
             data/example-index.json
             data/example-policy.json
             configs/.env.template
+            dist/agent-data-gateway-skill.tar.gz
+            dist/install-skill.sh
+            dist/uninstall-skill.sh
