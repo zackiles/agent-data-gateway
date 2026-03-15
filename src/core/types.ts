@@ -26,9 +26,9 @@ export interface Identity {
 }
 
 export interface RequestContext {
-  resource?: string;
-  purpose?: string;
-  region?: string;
+  resource?: string | undefined;
+  purpose?: string | undefined;
+  region?: string | undefined;
   [key: string]: unknown;
 }
 
@@ -65,15 +65,15 @@ export interface CompiledIndex {
 }
 
 export interface MatchBlock {
-  users_any?: string[];
-  groups_any?: string[];
-  resources_any?: string[];
-  purposes_any?: string[];
-  regions_any?: string[];
+  users_any?: string[] | undefined;
+  groups_any?: string[] | undefined;
+  resources_any?: string[] | undefined;
+  purposes_any?: string[] | undefined;
+  regions_any?: string[] | undefined;
 }
 
 export interface Rule {
-  match?: MatchBlock;
+  match?: MatchBlock | undefined;
   default_action: Action;
   unknown_action: Action;
   class_actions: Record<string, Action>;
@@ -103,11 +103,11 @@ export interface Finding {
 
 export interface Decision {
   path: string;
-  class?: string;
-  source?: string;
-  confidence?: number;
+  class?: string | undefined;
+  source?: string | undefined;
+  confidence?: number | undefined;
   action: Action;
-  reasoning?: string;
+  reasoning?: string | undefined;
 }
 
 export interface LeafNode {
@@ -122,7 +122,7 @@ export interface LeafNode {
 export interface SanitizeRequest {
   context: RequestContext;
   payload: unknown;
-  explain?: boolean;
+  explain?: boolean | undefined;
 }
 
 export interface ClassifyRequest {
@@ -135,16 +135,16 @@ export interface BuildRequest {
 
 export interface ClassifyResult {
   path: string;
-  class?: string;
-  source?: string;
-  confidence?: number;
-  findings?: Finding[];
+  class?: string | undefined;
+  source?: string | undefined;
+  confidence?: number | undefined;
+  findings?: Finding[] | undefined;
 }
 
 export interface ReasoningConfig {
   enabled: boolean;
   cli: 'claude' | 'cursor';
-  model?: string;
+  model?: string | undefined;
   timeout: number;
   minConfidence: number;
   maxSamples: number;
@@ -161,7 +161,7 @@ export interface Config {
   index: string;
   policy: string;
   port: number;
-  configFile?: string;
+  configFile?: string | undefined;
   adapterConfig: Record<string, string>;
   reasoning: ReasoningConfig;
   gitleaks: GitleaksConfig;
