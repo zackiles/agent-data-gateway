@@ -16,6 +16,7 @@
       "docs/",
       "data/",
       "configs/",
+      "skill/",
       "src/**/*_test.ts"
     ]
   },
@@ -52,5 +53,5 @@
       "exclude": ["no-explicit-any"]
     }
   },
-  "exclude": ["deploy/", "scripts/", "docs/"]
+  "exclude": ["deploy/", "scripts/", "docs/", "skill/"]
 }
