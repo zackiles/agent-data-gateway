@@ -1,24 +1,20 @@
 # Agent Data Gateway
 
-A service that automatically finds and removes sensitive data from JSON responses before they reach
-your users.
+Automatic PII and secret detection for JSON payloads. Classifies fields by path, key name, and regex
+pattern, then applies policy-driven transforms (mask, drop, hash, last4, etc.) before data leaves
+your backend.
 
-## Why use it?
+## Two ways to use it
 
-- Catches PII and secrets automatically via path, key, and pattern-based classification
-- Works with any auth provider through pluggable adapters (no-auth, trusted-header, OIDC/JWT, API
-  key)
-- Deploys as a single container with no external runtime dependencies
+### 1. Standalone service
 
-## Quickstart
+Deploy as a container (Docker, Cloud Run, ECS) that sits between your backend and consumers. Send
+JSON payloads to `/sanitize` and get scrubbed responses back.
 
 ```bash
-git clone https://github.com/zackiles/agent-data-gateway.git
-cd agent-data-gateway
+git clone https://github.com/zackiles/agent-data-gateway.git && cd agent-data-gateway
 ./scripts/run-local.sh
 ```
-
-In another terminal:
 
 ```bash
 curl -X POST http://localhost:8080/sanitize \
@@ -29,10 +25,67 @@ curl -X POST http://localhost:8080/sanitize \
   }'
 ```
 
-The response shows `email` masked (e.g. `j***@example.com`) and `sin` dropped entirely, per the
-example policy.
+The response masks `email` (`j***@example.com`) and drops `sin` entirely per the example policy.
 
-## Choose your auth
+### 2. Framework middleware (JSR package)
+
+Import into your existing Deno or Node.js API and mount the gateway endpoints directly on your
+server. No sidecar container needed.
+
+```bash
+deno add jsr:@agent-data-gateway/gateway   # Deno
+npx jsr add @agent-data-gateway/gateway    # Node
+```
+
+```typescript
+import { Gateway, noAuth } from '@agent-data-gateway/gateway';
+import { adapter } from '@agent-data-gateway/gateway/hono'; // or /oak, /express, /fastify, /nextjs
+import { Hono } from 'hono';
+
+const gateway = new Gateway({
+  index: JSON.parse(await Deno.readTextFile('index.json')),
+  policy: JSON.parse(await Deno.readTextFile('policy.json')),
+  auth: noAuth({ user: 'dev', groups: ['support'] }),
+  gitleaks: true,
+});
+
+const app = new Hono();
+app.route('/gateway', adapter(gateway));
+export default app;
+```
+
+See [docs/jsr-package.md](docs/jsr-package.md) for all supported frameworks and full API reference.
+
+## API endpoints
+
+All three endpoints accept `POST` with `application/json` or `text/event-stream` (SSE).
+
+| Endpoint       | Purpose                                                                             |
+| -------------- | ----------------------------------------------------------------------------------- |
+| `/sanitize`    | Scrub a payload per policy — returns cleaned JSON + optional `decisions` array      |
+| `/classify`    | Classify every leaf node — returns `classifications` with class, source, confidence |
+| `/index/build` | Build a classification index from sample payloads for bootstrapping                 |
+
+### Seeding your index
+
+The classification index tells the gateway which JSON paths and keys map to which data classes
+(`pii.email`, `government.id`, etc.). You can author it by hand, or bootstrap it from real data:
+
+```bash
+curl -X POST http://localhost:8080/index/build \
+  -H "Content-Type: application/json" \
+  -d '{"samples": [
+    {"payload": {"user": {"email": "a@b.com"}}},
+    {"payload": {"user": {"email": "c@d.com"}}},
+    {"payload": {"user": {"email": "e@f.com"}}}
+  ]}'
+```
+
+This works identically whether you're calling a deployed service or hitting a framework-mounted
+endpoint. Save the returned index JSON to a file and pass it to the gateway at startup. See
+[data/example-index.json](data/example-index.json) for the expected format.
+
+## Auth modes
 
 | Mode               | Use case                                                       |
 | ------------------ | -------------------------------------------------------------- |
@@ -41,16 +94,34 @@ example policy.
 | **oidc-jwt**       | Bearer JWT validation with JWKS; Okta, Auth0, Azure AD, etc.   |
 | **api-key**        | Service-to-service; static key-to-identity mapping             |
 
-See [docs/auth-modes.md](docs/auth-modes.md) for config keys and when to use each.
+When running as a standalone service, the auth mode is set via `SCRUBBER_ADAPTER` env var. When
+using the library, pass an auth adapter to the `Gateway` constructor — `noAuth` and `trustedHeader`
+are included, or implement the `Adapter` interface for custom auth. See
+[docs/auth-modes.md](docs/auth-modes.md) for details.
 
-## Deploy
+## Deploy (standalone service)
 
-- Docker: `docker build -f deploy/docker/Dockerfile . && docker run -p 8080:8080 ...`
-- Docker Compose: `docker compose -f deploy/generic/docker-compose.yml up`
-- Cloud Run: `deploy/cloud-run/service.yaml`
-- ECS: `deploy/ecs/task-definition.json`
+| Platform       | Command / Config                                         |
+| -------------- | -------------------------------------------------------- |
+| Local          | `./scripts/run-local.sh`                                 |
+| Docker         | `docker build -f deploy/docker/Dockerfile .`             |
+| Docker Compose | `docker compose -f deploy/generic/docker-compose.yml up` |
+| Cloud Run      | `deploy/cloud-run/service.yaml`                          |
+| ECS            | `deploy/ecs/task-definition.json`                        |
 
-See [docs/deployment.md](docs/deployment.md) for copy-paste commands per platform.
+See [docs/deployment.md](docs/deployment.md) for per-platform copy-paste commands.
+
+## Supported frameworks (library)
+
+| Framework                               | Version | Import                                |
+| --------------------------------------- | ------- | ------------------------------------- |
+| [Hono](https://hono.dev)                | 4.x     | `@agent-data-gateway/gateway/hono`    |
+| [Oak](https://github.com/oakserver/oak) | 17.x    | `@agent-data-gateway/gateway/oak`     |
+| [Express](https://expressjs.com)        | 5.x     | `@agent-data-gateway/gateway/express` |
+| [Fastify](https://fastify.dev)          | 5.x     | `@agent-data-gateway/gateway/fastify` |
+| [Next.js](https://nextjs.org)           | 15+     | `@agent-data-gateway/gateway/nextjs`  |
+
+See [docs/jsr-package.md](docs/jsr-package.md) for complete usage and configuration reference.
 
 ## Advanced: LLM-assisted classification
 
@@ -58,8 +129,7 @@ The deterministic classifier handles most cases. For edge cases (unusual field n
 values), enable the optional reasoning middleware. It shells out to Claude Code CLI or Cursor CLI to
 classify unknowns, then merges results into the policy engine.
 
-See [docs/reasoning-middleware.md](docs/reasoning-middleware.md) for setup, config, and
-troubleshooting.
+See [docs/reasoning-middleware.md](docs/reasoning-middleware.md) for setup and configuration.
 
 ## Configuration reference
 
