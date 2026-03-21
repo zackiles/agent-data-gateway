@@ -74,6 +74,47 @@ aws ecs create-service --cluster CLUSTER --service-name agent-data-gateway \
 
 Ensure the task has access to index and policy files (baked into image or mounted from EFS/Secrets Manager).
 
+## MCP server
+
+The gateway can run as an MCP (Model Context Protocol) server, letting AI assistants call
+sanitize, classify, and index-build as standard MCP tools. See [mcp.md](mcp.md) for the full
+guide.
+
+### Local (stdio)
+
+```bash
+./scripts/run-mcp.sh
+```
+
+Add the stdio config to your MCP client (Claude Desktop, Cursor, etc.) — see
+[deploy/mcp/mcp-config.json](../deploy/mcp/mcp-config.json) for a ready-to-use template.
+
+### Remote (streamable HTTP)
+
+```bash
+MCP_TRANSPORT=http MCP_PORT=8080 ./scripts/run-mcp.sh
+```
+
+### Docker
+
+```bash
+docker build -f deploy/docker/Dockerfile.mcp -t agent-data-gateway-mcp .
+docker run -p 8080:8080 \
+  -e SCRUBBER_ADAPTER=no-auth \
+  -e SCRUBBER_INDEX=/data/example-index.json \
+  -e SCRUBBER_POLICY=/data/example-policy.json \
+  -e SCRUBBER_NOAUTH_USER=local-dev \
+  -e SCRUBBER_NOAUTH_GROUPS=support,admin \
+  -v $(pwd)/data:/data:ro \
+  agent-data-gateway-mcp
+```
+
+### Docker Compose
+
+```bash
+docker compose -f deploy/mcp/docker-compose.yml up --build
+```
+
 ## Library deployment (alternative)
 
 Instead of running a separate container, you can embed the gateway into your existing application.

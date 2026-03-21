@@ -44,6 +44,13 @@ All `SCRUBBER_*` environment variables. Env vars override values from `SCRUBBER_
 | `SCRUBBER_NOAUTH_USER` | string | `local-dev` | no | Static user ID |
 | `SCRUBBER_NOAUTH_GROUPS` | string | (empty) | no | Comma-separated groups |
 
+## MCP server
+
+| Variable | Type | Default | Required | Description |
+|----------|------|---------|----------|-------------|
+| `MCP_TRANSPORT` | string | `stdio` | no | `stdio` or `http` |
+| `MCP_PORT` | number | (SCRUBBER_PORT) | no | Port for streamable HTTP transport |
+
 ## Reasoning middleware
 
 | Variable | Type | Default | Required | Description |
